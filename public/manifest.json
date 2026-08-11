@@ -1,0 +1,9 @@
+{
+  "author": "Thermetrics",
+  "appId": "6a4ba6e414d56658386af2f5",
+  "version": "1.0.0",
+  "versionDescription": "Support Dashboard for employees — calendar, trips and support tickets",
+  "config": {
+    "fields": {}
+  }
+}
