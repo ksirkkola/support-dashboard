@@ -9,6 +9,9 @@ import CalendarPanel from './components/CalendarPanel';
 import TripsPanel from './components/TripsPanel';
 import SupportTicketsPanel from './components/SupportTicketsPanel';
 import WorkOrdersPanel from './components/WorkOrdersPanel';
+import ReferencePanel from './components/ReferencePanel';
+import ThermDACPanel from './components/ThermDACPanel';
+import TimeTrackingPanel from './components/TimeTrackingPanel';
 
 export default function App() {
   const { api, inside, ready, settings } = useApp();
@@ -52,19 +55,25 @@ export default function App() {
       </Box>
 
       <Box px={6} pb={8}>
-        <Tabs variant="enclosed" colorScheme="blue">
+        <Tabs variant="enclosed" colorScheme="blue" isLazy>
           <TabList mb={4}>
+            <Tab fontWeight="semibold">📖 Reference</Tab>
             <Tab fontWeight="semibold">Calendar</Tab>
             <Tab fontWeight="semibold">Work Orders</Tab>
             <Tab fontWeight="semibold">Trips / IHS</Tab>
             <Tab fontWeight="semibold">Support Tickets</Tab>
+            <Tab fontWeight="semibold">ThermDAC</Tab>
+            <Tab fontWeight="semibold">⏱️ Time Tracking</Tab>
           </TabList>
 
           <TabPanels>
+            <TabPanel px={0}><ReferencePanel refreshKey={refreshKey} /></TabPanel>
             <TabPanel px={0}><CalendarPanel refreshKey={refreshKey} /></TabPanel>
             <TabPanel px={0}><WorkOrdersPanel refreshKey={refreshKey} /></TabPanel>
-            <TabPanel px={0}><TripsPanel refreshKey={refreshKey} /></TabPanel>
-            <TabPanel px={0}><SupportTicketsPanel refreshKey={refreshKey} /></TabPanel>
+            <TabPanel px={0}><TripsPanel refreshKey={refreshKey} onCaseCreated={refresh} /></TabPanel>
+            <TabPanel px={0}><SupportTicketsPanel refreshKey={refreshKey} onRefresh={refresh} /></TabPanel>
+            <TabPanel px={0}><ThermDACPanel refreshKey={refreshKey} /></TabPanel>
+            <TabPanel px={0}><TimeTrackingPanel refreshKey={refreshKey} onRefresh={refresh} /></TabPanel>
           </TabPanels>
         </Tabs>
       </Box>

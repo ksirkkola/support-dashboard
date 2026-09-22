@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.0.0",
-  "versionDescription": "Support Dashboard for employees — calendar, trips and support tickets",
+  "version": "1.8.1",
+  "versionDescription": "Restored the '+ Trip' quick action on Support Ticket rows (also lost when this app fell out of sync with git) — opens the New Case modal pre-filled with the ticket's customer where resolvable, and sets the trip's 'Source Support Ticket' link automatically on create.",
   "config": {
     "fields": {}
   }

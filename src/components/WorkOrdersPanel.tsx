@@ -2,7 +2,7 @@ import {
   Box, SimpleGrid, Stat, StatLabel, StatNumber, Badge, Spinner,
   Text, Flex, useColorModeValue, Heading, HStack, VStack, Select,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../hailer/use-app';
 
 const INSIGHT_WORK_ORDERS = '6a4ddad5d9b751c8857618a6';
@@ -60,6 +60,8 @@ export default function WorkOrdersPanel({ refreshKey = 0 }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPhase, setSelectedPhase] = useState('All');
+  const [selectedAssignee, setSelectedAssignee] = useState('all');
+  const [assigneeDefaultApplied, setAssigneeDefaultApplied] = useState(false);
 
   const cardBg      = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -77,10 +79,22 @@ export default function WorkOrdersPanel({ refreshKey = 0 }: Props) {
       .catch(err => { setError(String(err)); setLoading(false); });
   }, [inside, refreshKey]);
 
-  const filteredRows = selectedPhase === 'All' ? rows : rows.filter(r => r.phase === selectedPhase);
+  const assignees = useMemo(() => Array.from(new Set(rows.map(r => r.assignedTo).filter(Boolean))) as string[], [rows]);
+
+  // Default the view to "my work orders" once data + user are both loaded —
+  // only decided once, so it doesn't fight a manual filter choice on refresh.
+  useEffect(() => {
+    if (assigneeDefaultApplied) return;
+    if (rows.length === 0 || !user.current) return;
+    if (assignees.includes(user.current._id)) setSelectedAssignee(user.current._id);
+    setAssigneeDefaultApplied(true);
+  }, [rows.length, user.current, assignees, assigneeDefaultApplied]);
+
+  const scopedRows = selectedAssignee === 'all' ? rows : rows.filter(r => r.assignedTo === selectedAssignee);
+  const filteredRows = selectedPhase === 'All' ? scopedRows : scopedRows.filter(r => r.phase === selectedPhase);
 
   const phaseCounts = ALL_PHASES.reduce<Record<string, number>>((acc, p) => {
-    acc[p] = rows.filter(r => r.phase === p).length;
+    acc[p] = scopedRows.filter(r => r.phase === p).length;
     return acc;
   }, {});
 
@@ -117,16 +131,24 @@ export default function WorkOrdersPanel({ refreshKey = 0 }: Props) {
       </SimpleGrid>
 
       {/* Filter + count */}
-      <Flex align="center" justify="space-between" mb={4}>
+      <Flex align="center" justify="space-between" mb={1} wrap="wrap" gap={3}>
         <HStack>
           <Text fontWeight="semibold">Phase:</Text>
           <Select size="sm" maxW="200px" value={selectedPhase} onChange={e => setSelectedPhase(e.target.value)}>
-            <option value="All">All ({rows.length})</option>
+            <option value="All">All ({scopedRows.length})</option>
             {ALL_PHASES.map(p => <option key={p} value={p}>{p} ({phaseCounts[p]})</option>)}
+          </Select>
+          <Text fontWeight="semibold">Assigned To:</Text>
+          <Select size="sm" maxW="200px" value={selectedAssignee} onChange={e => setSelectedAssignee(e.target.value)}>
+            <option value="all">All Assignees</option>
+            {assignees.map(id => <option key={id} value={id}>{userName(id)}</option>)}
           </Select>
         </HStack>
         <Text fontSize="sm" color={labelColor}>{filteredRows.length} work order{filteredRows.length !== 1 ? 's' : ''}</Text>
       </Flex>
+      <Text fontSize="xs" color={labelColor} mb={4}>
+        {selectedAssignee === 'all' ? 'Showing all assignees\u2019 work orders.' : `Showing ${userName(selectedAssignee)}\u2019s work orders.`}
+      </Text>
 
       {/* Work order cards */}
       {filteredRows.length === 0 ? (
