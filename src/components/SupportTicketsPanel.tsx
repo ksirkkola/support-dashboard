@@ -499,6 +499,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                   <Thead bg={theadBg}>
                     <Tr>
                       <Th cursor="pointer" onClick={() => handleClosedSort('ticketCode')} userSelect="none">Code{closedSortIndicator('ticketCode')}</Th>
+                      <Th>Inbox Folder</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('company')} userSelect="none">Company{closedSortIndicator('company')}</Th>
                       <Th>Issue</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('assignedEngineer')} userSelect="none">Assigned To{closedSortIndicator('assignedEngineer')}</Th>
@@ -510,6 +511,11 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                     {searchedClosed.map(r => (
                       <Tr key={r.id} _hover={{ bg: rowHover }} cursor="pointer" onClick={() => hailer!.ui.activity.open(r.id)}>
                         <Td fontWeight="bold" whiteSpace="nowrap">{r.ticketCode || r.name}</Td>
+                        <Td whiteSpace="nowrap">
+                          <Badge colorScheme={r.inboxFolderCreated === 'Yes' ? 'green' : 'red'}>
+                            {r.inboxFolderCreated === 'Yes' ? 'Yes' : 'No'}
+                          </Badge>
+                        </Td>
                         <Td maxW="160px" isTruncated>{r.company || '—'}</Td>
                         <Td maxW="260px"><Text isTruncated fontSize="sm" title={r.issues || ''}>{r.issues || '—'}</Text></Td>
                         <Td whiteSpace="nowrap">

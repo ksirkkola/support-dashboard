@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.9.1",
-  "versionDescription": "Made the 'Closed' section's columns sortable (Code, Company, Assigned To, Date Received, Billable) \u2014 same click-to-sort pattern as the main table, independent sort state so sorting one section doesn't affect the other. Defaults to most-recently-received first.",
+  "version": "1.9.2",
+  "versionDescription": "Added the 'Inbox Folder' Yes/No column to the 'Closed' section's table \u2014 it was already in the main table but got left out when the Closed section was first built. Now consistent between both.",
   "config": {
     "fields": {}
   }
