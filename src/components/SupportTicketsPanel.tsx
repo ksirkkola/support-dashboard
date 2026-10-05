@@ -1,11 +1,12 @@
 import {
+  Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
   Box, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
   Table, Thead, Tbody, Tr, Th, Td, Spinner, Text, Badge, Checkbox,
   useColorModeValue, Flex, Select, Input, Button, useToast, useDisclosure,
 } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../hailer/use-app';
-import { INSIGHT_SUPPORT_TICKETS, ST_PHASE_COLOR } from '../constants/ids';
+import { INSIGHT_SUPPORT_TICKETS, INSIGHT_CLOSED_SUPPORT_TICKETS, ST_PHASE_COLOR } from '../constants/ids';
 import NewCaseModal from './NewCaseModal';
 
 const INSIGHT_RESOLVED = '6a4618a1e63a006e15353ada';
@@ -72,6 +73,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
   const { hailer, inside, user } = useApp();
   const toast = useToast();
   const [rows, setRows] = useState<TicketRow[]>([]);
+  const [closedRows, setClosedRows] = useState<TicketRow[]>([]);
   const [avgDays, setAvgDays] = useState<number | null>(null);
   const [resolvedCount, setResolvedCount] = useState(0);
   const [selectedEngineer, setSelectedEngineer] = useState('all');
@@ -104,7 +106,8 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
     Promise.all([
       hailer!.insight.data(INSIGHT_SUPPORT_TICKETS, { update: true }),
       hailer!.insight.data(INSIGHT_RESOLVED, { update: true }),
-    ]).then(([openData, resolvedData]) => {
+      hailer!.insight.data(INSIGHT_CLOSED_SUPPORT_TICKETS, { update: true }),
+    ]).then(([openData, resolvedData, closedData]) => {
       const headers: string[] = openData.headers;
       const parsed: TicketRow[] = openData.rows.map((row: unknown[]) => {
         const r: Record<string, unknown> = {};
@@ -112,6 +115,14 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
         return r as unknown as TicketRow;
       });
       setRows(parsed);
+
+      const closedHeaders: string[] = closedData.headers;
+      const parsedClosed: TicketRow[] = closedData.rows.map((row: unknown[]) => {
+        const r: Record<string, unknown> = {};
+        closedHeaders.forEach((h, i) => { r[h] = row[i]; });
+        return r as unknown as TicketRow;
+      });
+      setClosedRows(parsedClosed);
 
       // Calculate average resolution time in days
       const resolved = resolvedData.rows.filter(r => r[1] && r[2]);
@@ -156,6 +167,20 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
       (r.issues || '').toLowerCase().includes(q) ||
       (r.name || '').toLowerCase().includes(q));
   }, [rows, search]);
+
+  // Closed (Done) tickets are hidden from the main table/counts above — they used to
+  // be excluded from this dashboard entirely, which made it look like ticket numbers
+  // were missing/never created. They're real, just finished; tucked into a collapsed
+  // section below instead of cluttering the active-work view.
+  const searchedClosed = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const base = !q ? closedRows : closedRows.filter(r =>
+      (r.ticketCode || '').toLowerCase().includes(q) ||
+      (r.company || '').toLowerCase().includes(q) ||
+      (r.issues || '').toLowerCase().includes(q) ||
+      (r.name || '').toLowerCase().includes(q));
+    return base.slice().sort((a, b) => (b.dateReceived ?? 0) - (a.dateReceived ?? 0));
+  }, [closedRows, search]);
 
   const fromSec = dateFrom ? new Date(dateFrom).getTime() / 1000 : null;
   const toSec = dateTo ? new Date(dateTo).getTime() / 1000 + 86400 : null; // inclusive of the whole "to" day
@@ -440,7 +465,54 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
               })}
             </Tbody>
            </Table>
-        </Box>
+         </Box>
+       )}
+
+      {searchedClosed.length > 0 && (
+        <Accordion allowToggle mt={4}>
+          <AccordionItem border="1px" borderColor={borderColor} borderRadius="md">
+            <AccordionButton>
+              <Box flex="1" textAlign="left" fontSize="sm" fontWeight="medium">
+                Closed ({searchedClosed.length})
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel pb={4}>
+              <Box overflowX="auto" border="1px" borderColor={borderColor} borderRadius="md">
+                <Table variant="simple" size="sm">
+                  <Thead bg={theadBg}>
+                    <Tr>
+                      <Th>Code</Th>
+                      <Th>Company</Th>
+                      <Th>Issue</Th>
+                      <Th>Assigned To</Th>
+                      <Th>Date Received</Th>
+                      <Th>Billable</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {searchedClosed.map(r => (
+                      <Tr key={r.id} _hover={{ bg: rowHover }} cursor="pointer" onClick={() => hailer!.ui.activity.open(r.id)}>
+                        <Td fontWeight="bold" whiteSpace="nowrap">{r.ticketCode || r.name}</Td>
+                        <Td maxW="160px" isTruncated>{r.company || '—'}</Td>
+                        <Td maxW="260px"><Text isTruncated fontSize="sm" title={r.issues || ''}>{r.issues || '—'}</Text></Td>
+                        <Td whiteSpace="nowrap">
+                          {r.assignedEngineer
+                            ? (() => { const u = user.map[r.assignedEngineer!]; return u ? `${u.firstname} ${u.lastname}` : r.assignedEngineer; })()
+                            : <Text as="span" color={mutedText}>Unassigned</Text>}
+                        </Td>
+                        <Td whiteSpace="nowrap">{fmtDate(r.dateReceived)}</Td>
+                        <Td whiteSpace="nowrap">
+                          {r.billable ? <Badge colorScheme={r.billable === 'Yes' ? 'green' : 'gray'}>{r.billable}</Badge> : '—'}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
       )}
 
       <NewCaseModal

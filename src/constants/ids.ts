@@ -7,6 +7,7 @@ export const WORKFLOW_TIME_TRACKING = '6a06e492112c3668ef86bbdf';
 // Saved insight IDs for the dashboard
 export const INSIGHT_OPPORTUNITIES = '6a425d91199ea621d7fc4eb9';
 export const INSIGHT_SUPPORT_TICKETS = '6a425d9c199ea621d7fc4ed6';
+export const INSIGHT_CLOSED_SUPPORT_TICKETS = '6ac364fa51e0c3d87f5c1828';
 export const INSIGHT_THERMDAC_VERSIONS = '6aa727cd70ee49861ac0d68c';
 export const INSIGHT_THERMDAC_SETTINGS = '6aa72918fe11781c0e7e6033';
 export const INSIGHT_TIME_TRACKING = '6aa79da3da23a46b38d2f0cb';
