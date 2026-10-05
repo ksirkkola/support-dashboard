@@ -498,6 +498,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                 <Table variant="simple" size="sm">
                   <Thead bg={theadBg}>
                     <Tr>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('priority')} userSelect="none">Priority{closedSortIndicator('priority')}</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('ticketCode')} userSelect="none">Code{closedSortIndicator('ticketCode')}</Th>
                       <Th>Inbox Folder</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('company')} userSelect="none">Company{closedSortIndicator('company')}</Th>
@@ -510,6 +511,9 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                   <Tbody>
                     {searchedClosed.map(r => (
                       <Tr key={r.id} _hover={{ bg: rowHover }} cursor="pointer" onClick={() => hailer!.ui.activity.open(r.id)}>
+                        <Td whiteSpace="nowrap">
+                          {r.priority ? <Badge colorScheme={PRIORITY_COLOR[r.priority] || 'gray'}>{r.priority}</Badge> : '—'}
+                        </Td>
                         <Td fontWeight="bold" whiteSpace="nowrap">{r.ticketCode || r.name}</Td>
                         <Td whiteSpace="nowrap">
                           <Badge colorScheme={r.inboxFolderCreated === 'Yes' ? 'green' : 'red'}>

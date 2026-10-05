@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.9.2",
-  "versionDescription": "Added the 'Inbox Folder' Yes/No column to the 'Closed' section's table \u2014 it was already in the main table but got left out when the Closed section was first built. Now consistent between both.",
+  "version": "1.9.3",
+  "versionDescription": "Added the 'Priority' column to the 'Closed' section's table (sortable, same as the main table) \u2014 also left out when the section was first built. Closed section now has the same columns as the main table: Priority, Inbox Folder, Code, Company, Issue, Assigned To, Date Received, Billable.",
   "config": {
     "fields": {}
   }
