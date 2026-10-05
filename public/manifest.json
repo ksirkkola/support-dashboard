@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.9.0",
-  "versionDescription": "Added a collapsed 'Closed' section at the bottom of the Support Tickets table showing tickets in the 'Done' phase \u2014 these were previously excluded from the dashboard entirely (the underlying insight filtered them out), which made it look like some ticket numbers were never created when they'd actually just been completed. They're now visible but tucked away so the main table stays focused on active work.",
+  "version": "1.9.1",
+  "versionDescription": "Made the 'Closed' section's columns sortable (Code, Company, Assigned To, Date Received, Billable) \u2014 same click-to-sort pattern as the main table, independent sort state so sorting one section doesn't affect the other. Defaults to most-recently-received first.",
   "config": {
     "fields": {}
   }

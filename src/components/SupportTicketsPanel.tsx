@@ -66,7 +66,39 @@ function agingColor(days: number | null): string | null {
 
 const OPEN_PHASES = ['New Ticket', 'Triage', 'Working with Client', 'Software Upgrade', 'Follow-Up Activities', 'Waiting on Billing'];
 
-type SortKey = 'priority' | 'ticketCode' | 'company' | 'phase' | 'assignedEngineer' | 'dateReceived' | 'daysOpen';
+type SortKey = 'priority' | 'ticketCode' | 'company' | 'phase' | 'assignedEngineer' | 'dateReceived' | 'daysOpen' | 'billable';
+
+function compareTickets(a: TicketRow, b: TicketRow, sortKey: SortKey, sortDir: 'asc' | 'desc', userMap: Record<string, { firstname: string; lastname: string }>): number {
+  let av: number | string;
+  let bv: number | string;
+  switch (sortKey) {
+    case 'priority':
+      av = PRIORITY_RANK[a.priority || ''] ?? 99;
+      bv = PRIORITY_RANK[b.priority || ''] ?? 99;
+      break;
+    case 'dateReceived':
+      av = a.dateReceived ?? 0;
+      bv = b.dateReceived ?? 0;
+      break;
+    case 'daysOpen':
+      av = daysOpen(a.dateReceived) ?? -1;
+      bv = daysOpen(b.dateReceived) ?? -1;
+      break;
+    case 'assignedEngineer': {
+      const an = a.assignedEngineer ? userMap[a.assignedEngineer] : null;
+      const bn = b.assignedEngineer ? userMap[b.assignedEngineer] : null;
+      av = (an ? `${an.firstname} ${an.lastname}` : '').toLowerCase();
+      bv = (bn ? `${bn.firstname} ${bn.lastname}` : '').toLowerCase();
+      break;
+    }
+    default:
+      av = (a[sortKey] || '').toString().toLowerCase();
+      bv = (b[sortKey] || '').toString().toLowerCase();
+  }
+  if (av < bv) return sortDir === 'asc' ? -1 : 1;
+  if (av > bv) return sortDir === 'asc' ? 1 : -1;
+  return 0;
+}
 
 interface Props { refreshKey?: number; onRefresh?: () => void }
 export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props) {
@@ -85,6 +117,8 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
   const [dateTo, setDateTo] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('priority');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [closedSortKey, setClosedSortKey] = useState<SortKey>('dateReceived');
+  const [closedSortDir, setClosedSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkEngineer, setBulkEngineer] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -179,8 +213,8 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
       (r.company || '').toLowerCase().includes(q) ||
       (r.issues || '').toLowerCase().includes(q) ||
       (r.name || '').toLowerCase().includes(q));
-    return base.slice().sort((a, b) => (b.dateReceived ?? 0) - (a.dateReceived ?? 0));
-  }, [closedRows, search]);
+    return base.slice().sort((a, b) => compareTickets(a, b, closedSortKey, closedSortDir, user.map));
+  }, [closedRows, search, closedSortKey, closedSortDir, user.map]);
 
   const fromSec = dateFrom ? new Date(dateFrom).getTime() / 1000 : null;
   const toSec = dateTo ? new Date(dateTo).getTime() / 1000 + 86400 : null; // inclusive of the whole "to" day
@@ -198,38 +232,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
       return true;
     });
 
-    const sorted = rows2.slice().sort((a, b) => {
-      let av: number | string;
-      let bv: number | string;
-      switch (sortKey) {
-        case 'priority':
-          av = PRIORITY_RANK[a.priority || ''] ?? 99;
-          bv = PRIORITY_RANK[b.priority || ''] ?? 99;
-          break;
-        case 'dateReceived':
-          av = a.dateReceived ?? 0;
-          bv = b.dateReceived ?? 0;
-          break;
-        case 'daysOpen':
-          av = daysOpen(a.dateReceived) ?? -1;
-          bv = daysOpen(b.dateReceived) ?? -1;
-          break;
-        case 'assignedEngineer': {
-          const an = a.assignedEngineer ? user.map[a.assignedEngineer] : null;
-          const bn = b.assignedEngineer ? user.map[b.assignedEngineer] : null;
-          av = (an ? `${an.firstname} ${an.lastname}` : '').toLowerCase();
-          bv = (bn ? `${bn.firstname} ${bn.lastname}` : '').toLowerCase();
-          break;
-        }
-        default:
-          av = (a[sortKey] || '').toString().toLowerCase();
-          bv = (b[sortKey] || '').toString().toLowerCase();
-      }
-      if (av < bv) return sortDir === 'asc' ? -1 : 1;
-      if (av > bv) return sortDir === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return sorted;
+    return rows2.slice().sort((a, b) => compareTickets(a, b, sortKey, sortDir, user.map));
   }, [searched, selectedEngineer, selectedPhase, selectedCompany, fromSec, toSec, sortKey, sortDir, user.map]);
 
   function handleSort(key: SortKey) {
@@ -243,6 +246,19 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
   function sortIndicator(key: SortKey) {
     if (sortKey !== key) return '';
     return sortDir === 'asc' ? ' \u25B2' : ' \u25BC';
+  }
+
+  function handleClosedSort(key: SortKey) {
+    if (closedSortKey === key) {
+      setClosedSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setClosedSortKey(key);
+      setClosedSortDir('asc');
+    }
+  }
+  function closedSortIndicator(key: SortKey) {
+    if (closedSortKey !== key) return '';
+    return closedSortDir === 'asc' ? ' \u25B2' : ' \u25BC';
   }
 
   const phaseCounts = OPEN_PHASES.reduce<Record<string, number>>((acc, p) => {
@@ -482,12 +498,12 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                 <Table variant="simple" size="sm">
                   <Thead bg={theadBg}>
                     <Tr>
-                      <Th>Code</Th>
-                      <Th>Company</Th>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('ticketCode')} userSelect="none">Code{closedSortIndicator('ticketCode')}</Th>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('company')} userSelect="none">Company{closedSortIndicator('company')}</Th>
                       <Th>Issue</Th>
-                      <Th>Assigned To</Th>
-                      <Th>Date Received</Th>
-                      <Th>Billable</Th>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('assignedEngineer')} userSelect="none">Assigned To{closedSortIndicator('assignedEngineer')}</Th>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('dateReceived')} userSelect="none">Date Received{closedSortIndicator('dateReceived')}</Th>
+                      <Th cursor="pointer" onClick={() => handleClosedSort('billable')} userSelect="none">Billable{closedSortIndicator('billable')}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
