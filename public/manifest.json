@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.9.3",
-  "versionDescription": "Added the 'Priority' column to the 'Closed' section's table (sortable, same as the main table) \u2014 also left out when the section was first built. Closed section now has the same columns as the main table: Priority, Inbox Folder, Code, Company, Issue, Assigned To, Date Received, Billable.",
+  "version": "1.10.0",
+  "versionDescription": "Added a '+ Software' action next to '+ Trip' on each ticket row. A software upgrade still needs an in-house/on-site visit \u2014 it opens the same Trips/IHS case modal, just defaulted to the 'ThermDAC Upgrade' Service Type instead of Calibration (an option that already existed on the backend but wasn't in the app's dropdown list, now added).",
   "config": {
     "fields": {}
   }

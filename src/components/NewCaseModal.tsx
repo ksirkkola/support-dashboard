@@ -48,7 +48,7 @@ const TF_YEAR_OF_SERVICE = '6a211716b129621437c16b36';
 // it's safe to set at create time same as the rest of createFields).
 const TF_SOURCE_SUPPORT_TICKET = '6aa7a8f1da23a46b38d34fe5';
 
-const SERVICE_TYPES = ['Calibration', 'In House Service / Repair', 'Startup', 'Testing', 'Training'];
+const SERVICE_TYPES = ['Calibration', 'In House Service / Repair', 'Startup', 'Testing', 'Training', 'ThermDAC Upgrade'];
 
 interface Option {
   _id: string;
@@ -104,6 +104,11 @@ interface Props {
   // pre-fills the customer (when we can resolve it) and links the new trip
   // back to the ticket it was escalated from.
   sourceTicket?: { id: string; customerId: string | null };
+  // Set when opened via the "+ Software" quick action — pre-selects "ThermDAC
+  // Upgrade" instead of the default "Calibration" service type. A software
+  // upgrade still needs an in-house/on-site visit, same Trips/IHS record,
+  // just a different Service Type value.
+  defaultServiceType?: string;
 }
 
 // The gap this fills: Trips / IHS cases only ever got created via the
@@ -112,7 +117,7 @@ interface Props {
 // Manufacturing & Assembly's "+ Receive Stock": one modal, one submit,
 // creates the record with the fields the Triage phase allows at create time,
 // then a follow-up update fills in the rest (Customer link, issue notes).
-export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket }: Props) {
+export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket, defaultServiceType }: Props) {
   const { hailer } = useApp();
   const toast = useToast();
 
@@ -122,7 +127,7 @@ export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket 
 
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
-  const [serviceType, setServiceType] = useState('Calibration');
+  const [serviceType, setServiceType] = useState(defaultServiceType || 'Calibration');
   const [dateReceived, setDateReceived] = useState(toDateInputValue(Date.now()));
   const [assetText, setAssetText] = useState('');
   const [issues, setIssues] = useState('');
@@ -174,6 +179,16 @@ export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket 
     }
   }, [isOpen, sourceTicket, customers]);
 
+  // The modal stays mounted between opens (controlled by isOpen), so the
+  // Service Type needs to re-sync each time it's reopened — otherwise
+  // clicking "+ Software" right after "+ Trip" would carry over the
+  // previous selection instead of defaulting to ThermDAC Upgrade.
+  useEffect(() => {
+    if (!isOpen) return;
+    setServiceType(defaultServiceType || 'Calibration');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, defaultServiceType]);
+
   const selectedCustomer = customers.find((c) => c._id === customerId) || null;
   const contactsForCustomer = customerId ? contacts.filter((c) => c.companyId === customerId) : contacts;
   const selectedContact = contacts.find((c) => c._id === contactId) || null;
@@ -181,7 +196,7 @@ export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket 
   function reset() {
     setCustomerId(null);
     setContactId(null);
-    setServiceType('Calibration');
+    setServiceType(defaultServiceType || 'Calibration');
     setDateReceived(toDateInputValue(Date.now()));
     setAssetText('');
     setIssues('');
@@ -257,7 +272,7 @@ export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket 
           New Case (Trips / IHS)
           {sourceTicket && (
             <Text fontSize="xs" fontWeight="normal" color="gray.500" mt={1}>
-              Escalating from Support Ticket — will link back automatically.
+              Escalating from Support Ticket{defaultServiceType === 'ThermDAC Upgrade' ? ' as a Software Upgrade visit' : ''} — will link back automatically.
             </Text>
           )}
         </ModalHeader>

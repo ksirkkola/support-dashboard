@@ -2,7 +2,7 @@ import {
   Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
   Box, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText,
   Table, Thead, Tbody, Tr, Th, Td, Spinner, Text, Badge, Checkbox,
-  useColorModeValue, Flex, Select, Input, Button, useToast, useDisclosure,
+  useColorModeValue, Flex, Select, Input, Button, useToast, useDisclosure, HStack,
 } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../hailer/use-app';
@@ -125,6 +125,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tripSourceTicket, setTripSourceTicket] = useState<TicketRow | null>(null);
+  const [tripDefaultServiceType, setTripDefaultServiceType] = useState<string | undefined>(undefined);
   const { isOpen: isTripModalOpen, onOpen: openTripModal, onClose: closeTripModal } = useDisclosure();
 
   const cardBg = useColorModeValue('white', 'gray.700');
@@ -467,14 +468,24 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                       ) : '—'}
                     </Td>
                     <Td whiteSpace="nowrap">
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        colorScheme="blue"
-                        onClick={(e) => { e.stopPropagation(); setTripSourceTicket(r); openTripModal(); }}
-                      >
-                        + Trip
-                      </Button>
+                      <HStack spacing={1}>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          colorScheme="blue"
+                          onClick={(e) => { e.stopPropagation(); setTripSourceTicket(r); setTripDefaultServiceType(undefined); openTripModal(); }}
+                        >
+                          + Trip
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          colorScheme="purple"
+                          onClick={(e) => { e.stopPropagation(); setTripSourceTicket(r); setTripDefaultServiceType('ThermDAC Upgrade'); openTripModal(); }}
+                        >
+                          + Software
+                        </Button>
+                      </HStack>
                     </Td>
                   </Tr>
                 );
@@ -543,9 +554,10 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
 
       <NewCaseModal
         isOpen={isTripModalOpen}
-        onClose={() => { closeTripModal(); setTripSourceTicket(null); }}
+        onClose={() => { closeTripModal(); setTripSourceTicket(null); setTripDefaultServiceType(undefined); }}
         onSuccess={() => { onRefresh?.(); load(); }}
         sourceTicket={tripSourceTicket ? { id: tripSourceTicket.id, customerId: tripSourceTicket.customerId } : undefined}
+        defaultServiceType={tripDefaultServiceType}
       />
     </Box>
   );
