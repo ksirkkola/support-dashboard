@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../hailer/use-app';
 import { INSIGHT_SUPPORT_TICKETS, INSIGHT_CLOSED_SUPPORT_TICKETS, ST_PHASE_COLOR } from '../constants/ids';
 import NewCaseModal from './NewCaseModal';
+import NewTicketModal from './NewTicketModal';
 
 const INSIGHT_RESOLVED = '6a4618a1e63a006e15353ada';
 
@@ -126,6 +127,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
   const [error, setError] = useState<string | null>(null);
   const [tripSourceTicket, setTripSourceTicket] = useState<TicketRow | null>(null);
   const [tripDefaultServiceType, setTripDefaultServiceType] = useState<string | undefined>(undefined);
+  const { isOpen: isTicketModalOpen, onOpen: openTicketModal, onClose: closeTicketModal } = useDisclosure();
   const { isOpen: isTripModalOpen, onOpen: openTripModal, onClose: closeTripModal } = useDisclosure();
 
   const cardBg = useColorModeValue('white', 'gray.700');
@@ -323,6 +325,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
     <Box>
       {/* Filters */}
       <Flex gap={3} mb={2} wrap="wrap" align="center">
+        <Button size="sm" colorScheme="blue" onClick={openTicketModal}>+ New Ticket</Button>
         <Flex align="center" gap={2}>
           <Text fontWeight="semibold" whiteSpace="nowrap" fontSize="sm">Engineer:</Text>
           <Select maxW="200px" size="sm" value={selectedEngineer} onChange={e => setSelectedEngineer(e.target.value)}>
@@ -555,6 +558,12 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
           </AccordionItem>
         </Accordion>
       )}
+
+      <NewTicketModal
+        isOpen={isTicketModalOpen}
+        onClose={closeTicketModal}
+        onSuccess={() => { onRefresh?.(); load(); }}
+      />
 
       <NewCaseModal
         isOpen={isTripModalOpen}

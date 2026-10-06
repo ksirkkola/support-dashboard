@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.10.1",
-  "versionDescription": "New 'Duplicate' ticket phase now shows alongside Done in the 'Closed / Duplicate' section at the bottom (previously only Done tickets landed there \u2014 Duplicate tickets would have been invisible, excluded from both the open table and the closed section). Added a Phase column to that section so Done vs Duplicate is visible at a glance.",
+  "version": "1.11.0",
+  "versionDescription": "Added a '+ New Ticket' button on the Support Tickets tab. Opens a modal (Customer, optional Contact + Email, Request Type, Priority, Issue, optional Assign To) that creates the ticket in the New Ticket phase, links the Customer, then reads back the next-in-line ticket code (E####) assigned by Hailer and leads the ticket name with it.",
   "config": {
     "fields": {}
   }
