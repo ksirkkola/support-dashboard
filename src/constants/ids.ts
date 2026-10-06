@@ -49,6 +49,8 @@ export const ST_PHASE_COLOR: Record<string, string> = {
   'Software Upgrade': 'cyan',
   'Follow-Up Activities': 'purple',
   'Waiting on Billing': 'orange',
+  'Done': 'green',
+  'Duplicate': 'gray',
 };
 
 export const OPP_PHASE_COLOR: Record<string, string> = {

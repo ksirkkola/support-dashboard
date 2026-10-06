@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.10.0",
-  "versionDescription": "Added a '+ Software' action next to '+ Trip' on each ticket row. A software upgrade still needs an in-house/on-site visit \u2014 it opens the same Trips/IHS case modal, just defaulted to the 'ThermDAC Upgrade' Service Type instead of Calibration (an option that already existed on the backend but wasn't in the app's dropdown list, now added).",
+  "version": "1.10.1",
+  "versionDescription": "New 'Duplicate' ticket phase now shows alongside Done in the 'Closed / Duplicate' section at the bottom (previously only Done tickets landed there \u2014 Duplicate tickets would have been invisible, excluded from both the open table and the closed section). Added a Phase column to that section so Done vs Duplicate is visible at a glance.",
   "config": {
     "fields": {}
   }

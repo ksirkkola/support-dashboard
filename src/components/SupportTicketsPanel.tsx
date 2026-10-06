@@ -500,7 +500,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
           <AccordionItem border="1px" borderColor={borderColor} borderRadius="md">
             <AccordionButton>
               <Box flex="1" textAlign="left" fontSize="sm" fontWeight="medium">
-                Closed ({searchedClosed.length})
+                Closed / Duplicate ({searchedClosed.length})
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -511,6 +511,7 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                     <Tr>
                       <Th cursor="pointer" onClick={() => handleClosedSort('priority')} userSelect="none">Priority{closedSortIndicator('priority')}</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('ticketCode')} userSelect="none">Code{closedSortIndicator('ticketCode')}</Th>
+                      <Th>Phase</Th>
                       <Th>Inbox Folder</Th>
                       <Th cursor="pointer" onClick={() => handleClosedSort('company')} userSelect="none">Company{closedSortIndicator('company')}</Th>
                       <Th>Issue</Th>
@@ -526,6 +527,9 @@ export default function SupportTicketsPanel({ refreshKey = 0, onRefresh }: Props
                           {r.priority ? <Badge colorScheme={PRIORITY_COLOR[r.priority] || 'gray'}>{r.priority}</Badge> : '—'}
                         </Td>
                         <Td fontWeight="bold" whiteSpace="nowrap">{r.ticketCode || r.name}</Td>
+                        <Td whiteSpace="nowrap">
+                          <Badge colorScheme={ST_PHASE_COLOR[r.phase] || 'gray'}>{r.phase || '—'}</Badge>
+                        </Td>
                         <Td whiteSpace="nowrap">
                           <Badge colorScheme={r.inboxFolderCreated === 'Yes' ? 'green' : 'red'}>
                             {r.inboxFolderCreated === 'Yes' ? 'Yes' : 'No'}
