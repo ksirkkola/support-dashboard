@@ -35,6 +35,7 @@ interface TripRow {
   poAmount: number | null;
   poNumber: string | null;
   invoicedAmount: number | null;
+  tmxeAfterExpenses: number | null;
   iso17025: string | null;
   estimatedMonth: string | null;
 }
@@ -43,6 +44,13 @@ function fmt(val: unknown): string {
   const n = Number(val);
   if (!val || isNaN(n) || n === 0) return '—';
   return '€' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+// Money that can legitimately be negative (revenue after expenses): show the sign, not a bare '€-1,234'.
+function fmtSigned(val: unknown): string {
+  const n = Number(val);
+  if (val === null || val === undefined || val === '' || isNaN(n)) return '—';
+  return (n < 0 ? '-€' : '€') + Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
 function fmtDate(val: unknown): string {
@@ -318,6 +326,7 @@ export default function TripsPanel({ refreshKey = 0, onCaseCreated }: Props) {
                     <Th>Company</Th>
                     <Th>Assigned Engineer</Th>
                     <Th isNumeric>Invoiced</Th>
+                    <Th isNumeric>TMXE After Expenses</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -329,6 +338,10 @@ export default function TripsPanel({ refreshKey = 0, onCaseCreated }: Props) {
                       <Td fontSize="sm">{r.company || '—'}</Td>
                       <Td fontSize="sm">{userName(r.assignedTraveler)}</Td>
                       <Td fontSize="sm" isNumeric>{fmt(r.invoicedAmount)}</Td>
+                      <Td fontSize="sm" isNumeric fontWeight="semibold"
+                        color={Number(r.tmxeAfterExpenses) < 0 ? 'red.500' : undefined}>
+                        {fmtSigned(r.tmxeAfterExpenses)}
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>

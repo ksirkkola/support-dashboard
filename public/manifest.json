@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.11.0",
-  "versionDescription": "Added a '+ New Ticket' button on the Support Tickets tab. Opens a modal (Customer, optional Contact + Email, Request Type, Priority, Issue, optional Assign To) that creates the ticket in the New Ticket phase, links the Customer, then reads back the next-in-line ticket code (E####) assigned by Hailer and leads the ticket name with it.",
+  "version": "1.12.0",
+  "versionDescription": "Trips / IHS tab > Recently Closed: added a 'TMXE After Expenses' column right after Invoiced (TMXE Total minus travel expenses, loyalty fees and parts cost), shown in red when negative. The Invoiced column now falls back to TMXE Total when the old Amount to Invoice value is empty.",
   "config": {
     "fields": {}
   }
