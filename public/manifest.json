@@ -1,8 +1,8 @@
 {
   "author": "Thermetrics",
   "appId": "6a4ba6e414d56658386af2f5",
-  "version": "1.12.0",
-  "versionDescription": "Trips / IHS tab > Recently Closed: added a 'TMXE After Expenses' column right after Invoiced (TMXE Total minus travel expenses, loyalty fees and parts cost), shown in red when negative. The Invoiced column now falls back to TMXE Total when the old Amount to Invoice value is empty.",
+  "version": "1.12.1",
+  "versionDescription": "Every activity created from this app now adds all employees (except Robert Broman, Nico Larsen and the bot) to its discussion.",
   "config": {
     "fields": {}
   }

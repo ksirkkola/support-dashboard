@@ -6,6 +6,7 @@ import {
 } from '@chakra-ui/react';
 import { Activity, ActivityFieldValue, HailerApi } from '@hailer/app-sdk';
 import { useApp } from '../hailer/use-app';
+import { createActivities } from '../hailer/employees';
 import SearchableSelect from './SearchableSelect';
 
 // Customers
@@ -231,10 +232,11 @@ export default function NewCaseModal({ isOpen, onClose, onSuccess, sourceTicket,
       if (selectedContact.email.trim()) createFields[TF_CONTACT_EMAIL] = selectedContact.email;
       if (sourceTicket) createFields[TF_SOURCE_SUPPORT_TICKET] = sourceTicket.id;
 
-      const created = await hailer.activity.create(
+      // Every employee joins the case's discussion.
+      const created = await createActivities(
+        hailer,
         TRIPS_WORKFLOW,
         [{ name: `${selectedCustomer.name} - ${serviceType}`, phaseId: TRIPS_TRIAGE_PHASE, fields: createFields }],
-        {},
       );
       const newId = created?.[0]?._id;
       if (!newId) throw new Error('Case was not created — no ID returned.');

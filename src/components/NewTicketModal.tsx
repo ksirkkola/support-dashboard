@@ -6,6 +6,7 @@ import {
 } from '@chakra-ui/react';
 import { Activity, ActivityFieldValue, HailerApi } from '@hailer/app-sdk';
 import { useApp } from '../hailer/use-app';
+import { createActivities } from '../hailer/employees';
 import SearchableSelect from './SearchableSelect';
 import {
   ST_FIELD_COMPANY, ST_FIELD_CUSTOMER_LINK, ST_PHASE_NEW_TICKET, WORKFLOW_SUPPORT_TICKETS,
@@ -192,10 +193,11 @@ export default function NewTicketModal({ isOpen, onClose, onSuccess }: Props) {
       if (selectedCustomer.name.trim()) createFields[ST_FIELD_COMPANY] = selectedCustomer.name;
       if (email.trim()) createFields[SF_EMAIL] = email.trim();
 
-      const created = await hailer.activity.create(
+      // Every employee joins the ticket's discussion.
+      const created = await createActivities(
+        hailer,
         WORKFLOW_SUPPORT_TICKETS,
         [{ name: `${selectedCustomer.name} - ${requestType}`, phaseId: ST_PHASE_NEW_TICKET, fields: createFields }],
-        {},
       );
       const newId = created?.[0]?._id;
       if (!newId) throw new Error('Ticket was not created — no ID returned.');

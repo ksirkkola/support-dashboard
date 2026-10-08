@@ -8,6 +8,7 @@ import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { useApp } from '../hailer/use-app';
+import { createActivityViaDialog } from '../hailer/employees';
 import {
   INSIGHT_THERMDAC_SETTINGS, INSIGHT_THERMDAC_VERSIONS,
   ST_FIELD_ASSET_LINK, ST_FIELD_COMPANY, ST_PHASE_NEW_TICKET, WORKFLOW_SUPPORT_TICKETS,
@@ -143,7 +144,7 @@ export default function ThermDACPanel(props: { refreshKey?: number }) {
 
   function openSupportTicketFor(asset: AssetRow) {
     if (!hailer) return;
-    void hailer.ui.activity.create(WORKFLOW_SUPPORT_TICKETS, {
+    void createActivityViaDialog(hailer, WORKFLOW_SUPPORT_TICKETS, {
       name: `${asset.customerName || 'Unknown'} - ${asset.name} - ThermDAC`,
       phaseId: ST_PHASE_NEW_TICKET,
       fields: {

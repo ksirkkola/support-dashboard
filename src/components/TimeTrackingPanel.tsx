@@ -5,6 +5,7 @@ import {
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { useApp } from '../hailer/use-app';
+import { createActivityViaDialog } from '../hailer/employees';
 import { INSIGHT_TIME_TRACKING, TT_PHASE_COLOR, WORKFLOW_TIME_TRACKING } from '../constants/ids';
 import { useInsight } from '../hailer/use-insight';
 
@@ -74,7 +75,7 @@ export default function TimeTrackingPanel(props: { refreshKey?: number; onRefres
 
   function openLogTime() {
     if (!hailer) return;
-    void hailer.ui.activity.create(WORKFLOW_TIME_TRACKING).then(result => {
+    void createActivityViaDialog(hailer, WORKFLOW_TIME_TRACKING).then(result => {
       if (result) props.onRefresh?.();
     });
   }
